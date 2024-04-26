@@ -1,9 +1,10 @@
-using Blog_Backend.Controllers;
 using Blog_Backend.Services;
+using DataAccess.DbAccess;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +15,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IUserData, UserData>();
+builder.Services.AddSingleton<IDbAccess, DbAccess>();
 builder.Services.AddScoped<IUserService, UserService>();
-
 // add firebase
 
 builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
@@ -42,6 +42,10 @@ builder.Services.AddCors(options => options.AddPolicy("default", policy =>
     .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
 
 }));
+
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ClaimsPrincipal>(s => s.GetService<IHttpContextAccessor>().HttpContext.User);
 
 var app = builder.Build();
 

@@ -1,8 +1,9 @@
-﻿using Blog_Backend.Model;
+﻿using Blog_Backend.Models;
 using Blog_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,19 +12,18 @@ namespace Blog_Backend.Controllers
     [Route("api/[controller]")]
     [ApiController]
 
-    public class AuthController : ControllerBase
+    public class UserController : ControllerBase
     {
 
 
-        private readonly IAuthService _authService;
 
         private readonly IUserService _userService;
 
 
 
-        public AuthController(IAuthService authService, IUserService userService)
+        public UserController(IUserService userService)
         {
-            _authService = authService;
+
             _userService = userService;
         }
 
@@ -31,15 +31,38 @@ namespace Blog_Backend.Controllers
         [HttpPost("login")]
         public ActionResult Login()
         {
-            return Ok("Login");
+            try
+            {
+                _userService.LoginUser();
+
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
         [Authorize]
         [HttpPost("register")]
-        public ActionResult Register(User user)
+        public ActionResult Register()
         {
+  
 
-            return Ok(_userService.CreateUser(user));
+            try
+            {
+                _userService.RegiserUser();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+       
 
         }
     }
