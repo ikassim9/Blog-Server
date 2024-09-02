@@ -16,8 +16,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IUserData, UserData>();
+builder.Services.AddSingleton<IPostData, PostData>();
 builder.Services.AddSingleton<IDbAccess, DbAccess>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPostService, PostService>();
 // add firebase
 
 builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
