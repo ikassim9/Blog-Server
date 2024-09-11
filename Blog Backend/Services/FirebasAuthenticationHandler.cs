@@ -11,7 +11,7 @@ namespace Blog_Backend.Services
 {
     public class FirebasAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private FirebaseApp _firebaseApp;
+        private readonly FirebaseApp _firebaseApp;
 
         public FirebasAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, FirebaseApp firebaseApp) : base(options, logger, encoder, clock)
         {
