@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /.editorconfig
 /Blog.sln
+/Blog Backend/libman.json
