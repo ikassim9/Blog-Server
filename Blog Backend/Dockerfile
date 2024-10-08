@@ -20,4 +20,4 @@ RUN dotnet publish "./Blog.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Us
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["./Blog Backend/Blog"]
+ENTRYPOINT ["./Blog Backend"]
