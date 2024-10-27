@@ -36,12 +36,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 
-builder.Services.AddCors(options => options.AddPolicy("default", policy =>
+builder.Services.AddCors(options => options.AddPolicy("dev", policy =>
 {
 
     policy.WithOrigins("http://localhost:3000")
 
+
     .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+
+}));
+
+builder.Services.AddCors(options => options.AddPolicy("production", policy =>
+{
+
+    policy.WithOrigins("https://blog-it.up.railway.app/")
+
+
+     .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
 
 }));
 
@@ -63,7 +74,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("default");
+//app.UseCors("default");
+app.UseCors("prod");
 
 
 app.UseHttpsRedirection();

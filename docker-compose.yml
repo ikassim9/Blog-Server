@@ -1,7 +1,36 @@
+name: blog-app
 services:
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+        ACCEPT_EULA: "Y"
+        MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
+        MSSQL_PID: Developer
+    container_name: mssql
+    ports:
+        - "1433:1433"
   blog:
     image: ${DOCKER_REGISTRY-}blog
     build:
       context: .
       dockerfile: Blog Backend/Dockerfile
-  
+    container_name: backend
+    environment:
+        - ASPNETCORE_URLS=https://+:8080
+        - ASPNETCORE_URLS=http://+:8081
+        - ConnectionStrings__Default
+        - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+        - 55190:8080
+        - 55191:8081
+    depends_on:
+        - mssql 
+  mssql-tools:
+    image: mcr.microsoft.com/mssql-tools:latest
+    restart: on-failure
+    command: "/opt/mssql-tools/bin/sqlcmd -S mssql -l 60 -U sa -P '${DB_PASSWORD}' -d master -i /tmp/mssql-init.sql"
+    container_name: mssql-tools
+    depends_on:
+        - mssql
+    volumes:
+        - ./entry.sql:/tmp/mssql-init.sql
