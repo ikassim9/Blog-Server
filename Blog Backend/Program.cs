@@ -75,7 +75,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseCors("default");
-app.UseCors("prod");
+app.UseCors("production");
 
 
 app.UseHttpsRedirection();
