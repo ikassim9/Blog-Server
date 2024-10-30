@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'blog-backend'
           slot-name: 'Production'
-          package: .
+          package: ${{ github.workspace }}/myapp
           
