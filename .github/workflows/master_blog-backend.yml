@@ -27,6 +27,9 @@ jobs:
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{github.workspace}}/myapp
 
+      - name: List published files
+        run: ls -R ${{ github.workspace }}/myapp
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -41,6 +44,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+    
 
     steps:
       - name: Download artifact from build job
