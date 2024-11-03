@@ -58,13 +58,10 @@ builder.Services.AddCors(options => options.AddPolicy("production", policy =>
 
 
 
-var keyVaultEndPoint = new Uri("https://blogkeyvalut.vault.azure.net/");
-var secretClient = new SecretClient(keyVaultEndPoint, new DefaultAzureCredential());
+//var keyVaultEndPoint = new Uri("https://blogkeyvalut.vault.azure.net/");
+//var secretClient = new SecretClient(keyVaultEndPoint, new DefaultAzureCredential());
 
-KeyVaultSecret keyVault = secretClient.GetSecret("blogDbSecret");
-
-
-
+//KeyVaultSecret keyVault = secretClient.GetSecret("blogDbSecret");
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ClaimsPrincipal>(s => s.GetService<IHttpContextAccessor>().HttpContext.User);
 
