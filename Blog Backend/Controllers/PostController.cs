@@ -37,36 +37,36 @@ public class PostController : ControllerBase
 
         try
         {
-            //  var response = await _postService.GetPosts();
+             var response = await _postService.GetPosts();
 
-            var tempData = new List<PostModel>
-            {
+            //var tempData = new List<PostModel>
+            //{
 
-                new PostModel
-                {
-                    Title="Apple watch",
-                    Id=1,
-                    Description="Some description",
-                    UserId="1"
-                },
-                  new PostModel
-                {
-                    Title="Tesla",
-                    Id=2,
-                    Description="Some description",
-                    UserId="2"
-                },
-                    new PostModel
-                {
-                    Title="Television",
-                    Id=3,
-                    Description="Some description",
-                    UserId="3"
-                }
+            //    new PostModel
+            //    {
+            //        Title="Apple watch",
+            //        Id=1,
+            //        Description="Some description",
+            //        UserId="1"
+            //    },
+            //      new PostModel
+            //    {
+            //        Title="Tesla",
+            //        Id=2,
+            //        Description="Some description",
+            //        UserId="2"
+            //    },
+            //        new PostModel
+            //    {
+            //        Title="Television",
+            //        Id=3,
+            //        Description="Some description",
+            //        UserId="3"
+            //    }
 
-            };
+            //};
 
-            return Ok(tempData);
+            return Ok(response);
         }
         catch (Exception e)
         {

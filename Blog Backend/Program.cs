@@ -4,6 +4,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Configuration;
 using System.Security.Claims;
 
 
@@ -32,6 +33,10 @@ builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddScheme<AuthenticationSchemeOptions, FirebasAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
+
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 
 
 
