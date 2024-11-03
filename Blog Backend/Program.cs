@@ -4,7 +4,6 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Configuration;
 using System.Security.Claims;
 
 
@@ -36,9 +35,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-
-
 
 
 builder.Services.AddCors(options => options.AddPolicy("dev", policy =>
