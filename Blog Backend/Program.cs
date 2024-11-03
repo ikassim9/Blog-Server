@@ -1,3 +1,6 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Core;
 using Blog_Backend.Services;
 using DataAccess.DbAccess;
 using FirebaseAdmin;
@@ -28,13 +31,9 @@ builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
 
 }));
 
-
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddScheme<AuthenticationSchemeOptions, FirebasAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
 
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 
 builder.Services.AddCors(options => options.AddPolicy("dev", policy =>
@@ -56,6 +55,14 @@ builder.Services.AddCors(options => options.AddPolicy("production", policy =>
      .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
 
 }));
+
+
+
+var keyVaultEndPoint = new Uri("https://blogkeyvalut.vault.azure.net/");
+var secretClient = new SecretClient(keyVaultEndPoint, new DefaultAzureCredential());
+
+KeyVaultSecret keyVault = secretClient.GetSecret("blogDbSecret");
+
 
 
 builder.Services.AddHttpContextAccessor();
