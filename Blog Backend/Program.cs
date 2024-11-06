@@ -12,10 +12,13 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var keyVaultEndPoint = new Uri(builder.Configuration["VaultKey"]);
+//use production db only in production enviroment else we will use local db for dev
+if (builder.Environment.IsProduction())
+{
+    var keyVaultEndPoint = new Uri(builder.Configuration["VaultKey"]);
 
-builder.Configuration.AddAzureKeyVault(keyVaultEndPoint, new DefaultAzureCredential());
- 
+    builder.Configuration.AddAzureKeyVault(keyVaultEndPoint, new DefaultAzureCredential());
+}
 // Add services to the container.
 
 builder.Services.AddControllers();
