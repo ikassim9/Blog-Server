@@ -40,7 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 
-builder.Services.AddCors(options => options.AddPolicy("dev", policy =>
+builder.Services.AddCors(options => options.AddPolicy("default", policy =>
 {
 
     policy.WithOrigins("http://localhost:3000")
@@ -53,7 +53,7 @@ builder.Services.AddCors(options => options.AddPolicy("dev", policy =>
 builder.Services.AddCors(options => options.AddPolicy("production", policy =>
 {
 
-    policy.WithOrigins("https://blog-it.up.railway.app")
+    policy.WithOrigins("https://scribetoread.com")
 
 
      .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
@@ -74,16 +74,16 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-//app.UseCors("default");
+app.UseCors("default");
 app.UseCors("production");
 
 
