@@ -46,7 +46,7 @@ builder.Services.AddCors(options => options.AddPolicy("default", policy =>
     policy.WithOrigins("http://localhost:3000")
 
 
-    .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+    .AllowAnyHeader().AllowAnyMethod();
 
 }));
 
@@ -56,7 +56,7 @@ builder.Services.AddCors(options => options.AddPolicy("production", policy =>
     policy.WithOrigins("https://scribetoread.com")
 
 
-     .AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+     .AllowAnyHeader().AllowAnyMethod();
 
 }));
 
