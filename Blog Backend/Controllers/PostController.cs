@@ -1,4 +1,5 @@
-﻿using Blog_Backend.Services;
+﻿using Blog_Backend.Models;
+using Blog_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -22,10 +23,20 @@ public class PostController : ControllerBase
 
     [Authorize]
     [HttpPost("CreatePost")]
-    public ActionResult CreatePost(string title, string description)
+    public async Task<ActionResult> CreatePost(PostRequest post)
     {
 
-        _postService.CreatePost(title, description);
+        try
+        {
+            await _postService.CreatePost(post);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
 
         return Ok();
     }

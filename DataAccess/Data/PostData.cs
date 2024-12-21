@@ -20,7 +20,7 @@ public class PostData : IPostData
 
     public Task<int> InsertPost(PostModel post)
     {
-        return _db.SaveData<dynamic>("dbo.spPost_Insert", new { post.UserId, post.Title, post.Description });
+        return _db.SaveData<dynamic>("dbo.spPost_Insert", new { post.UserId, post.Title, post.Description, post.Thumbnail });
     }
 
     public Task<IEnumerable<PostModel>> GetPosts()

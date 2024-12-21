@@ -30,6 +30,7 @@ builder.Services.AddSingleton<IPostData, PostData>();
 builder.Services.AddSingleton<IDbAccess, DbAccess>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IS3Service, S3Service>();
 // add firebase
 
 builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
