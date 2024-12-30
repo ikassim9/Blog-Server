@@ -61,4 +61,14 @@ public class PostController : ControllerBase
         }
 
     }
+
+
+    [HttpGet("GetPostById/{id}")]
+
+    public  async Task<ActionResult> GetPostById(int id)
+    {
+        var response = await _postService.GetPostById(id);
+
+        return Ok(response);
+    }
 }

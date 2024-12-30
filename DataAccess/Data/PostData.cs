@@ -27,4 +27,13 @@ public class PostData : IPostData
     {
           return _db.LoadData<PostModel, dynamic>("dbo.spPost_GetAll", new { });
     }
+
+    public async Task<PostModel> GetPostById(int id)
+    {
+        var post = await _db.LoadData<PostModel, dynamic>("dbo.spPost_Get", new { id = id });
+
+
+        return post.FirstOrDefault();
+
+    }
 }

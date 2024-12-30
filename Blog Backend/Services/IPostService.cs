@@ -7,4 +7,6 @@ public interface IPostService
     Task CreatePost(PostRequest post);
 
     Task<IEnumerable<PostModel>> GetPosts();
+
+    Task<PostModel> GetPostById(int id);
 }

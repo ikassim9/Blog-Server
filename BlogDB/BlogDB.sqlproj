@@ -67,6 +67,7 @@
     <Build Include="dbo\Procedures\SpUser_Get.sql" />
     <Build Include="dbo\Procedures\SpPost_Insert.sql" />
     <Build Include="dbo\Procedures\SpPost_GetAll.sql" />
+    <Build Include="dbo\Procedures\SpPost_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlogDB.publish.xml" />

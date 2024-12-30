@@ -95,4 +95,12 @@ public class PostService : IPostService
 
       
     }
+
+    public async Task<PostModel> GetPostById(int id)
+    {
+
+       var post = await _postData.GetPostById(id);
+
+        return post;
+    }
 }

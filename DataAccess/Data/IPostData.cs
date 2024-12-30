@@ -7,5 +7,7 @@ public interface IPostData
     Task<int> InsertPost(PostModel post);
 
     Task<IEnumerable<PostModel>> GetPosts();
+
+    Task<PostModel> GetPostById(int id);
  
 }
