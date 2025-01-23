@@ -2,6 +2,8 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Blog_Backend.Models;
 using FirebaseAdmin.Auth;
 using System.Security.Claims;
@@ -35,11 +37,19 @@ public class PostService : IPostService
 
             if (post.Image != null)
             {
+                var credential = new DefaultAzureCredential();
 
-                var bucketName = _config["AwsConfiguration:BucketName"];
-                var AwsAcessKey = _config["AwsConfiguration:AcessKey"];
-                var AwsSecretKey = _config["AwsConfiguration:SecretKey"];
-                var credentials = new BasicAWSCredentials(AwsAcessKey, AwsSecretKey);
+                // Create a SecretClient
+                var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
+
+                var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
+
+
+                var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
+
+                var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
+
+                 var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
 
                 var config = new AmazonS3Config()
                 {
@@ -56,9 +66,9 @@ public class PostService : IPostService
 
                 var objName = $"{Guid.NewGuid()}.{fileName}";
 
-                await _s3Service.UploadFileAsync(client, bucketName, objName, memoryStream);
+                await _s3Service.UploadFileAsync(client, bucketName.Value.Value, objName, memoryStream);
 
-                thumbnail = $"https://{bucketName}.s3.amazonaws.com/{objName}";
+                thumbnail = $"https://{bucketName.Value.Value}.s3.amazonaws.com/{objName}";
 
             }
 
