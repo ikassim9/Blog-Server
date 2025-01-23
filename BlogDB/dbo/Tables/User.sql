@@ -2,5 +2,5 @@
 (
 	[id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [user_id] VARCHAR(50) NOT NULL UNIQUE, 
-    [name] VARCHAR(50) NULL
+    [name] VARCHAR(50) NOT NULL
 )
