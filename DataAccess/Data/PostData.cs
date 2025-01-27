@@ -1,10 +1,5 @@
 ﻿using DataAccess.DbAccess;
-using DataAccess.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataAccess.Models; 
 
 namespace DataAccess.Data;
 public class PostData : IPostData
@@ -35,5 +30,11 @@ public class PostData : IPostData
 
         return post.FirstOrDefault();
 
+    }
+    public async Task<IEnumerable<PostModel>> GetPostByUserId(string id)
+    {
+        var post = await _db.LoadData<PostModel, dynamic>("dbo.SpPost_GetByUserId", new { id = id });
+
+        return post;
     }
 }

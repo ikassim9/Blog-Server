@@ -113,4 +113,29 @@ public class PostService : IPostService
 
         return post;
     }
+ 
+    public async Task<IEnumerable<UserPostModelResponse>> GetPostByUserId(string profileId)
+    {
+        try
+        {
+
+            var posts = await _postData.GetPostByUserId(profileId);
+
+            return posts.Select(post => new UserPostModelResponse
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Thumbnail = post.Thumbnail
+            });
+
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+
+            throw;
+        }
+    }
 }

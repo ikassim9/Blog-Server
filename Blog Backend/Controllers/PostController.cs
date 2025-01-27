@@ -65,10 +65,20 @@ public class PostController : ControllerBase
 
     [HttpGet("GetPostById/{id}")]
 
-    public  async Task<ActionResult> GetPostById(int id)
+    public  async Task<ActionResult<PostModel>> GetPostById(int id)
     {
         var response = await _postService.GetPostById(id);
 
         return Ok(response);
     }
+
+ 
+    [HttpGet("GetPostByUserId/{profileId}")]
+    public async Task<ActionResult<IEnumerable<PostModel>>> GetPostByUserId(string profileId)
+    {
+        var response = await _postService.GetPostByUserId(profileId);
+
+        return Ok(response);
+    }
+
 }

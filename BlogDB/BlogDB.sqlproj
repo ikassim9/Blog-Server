@@ -68,8 +68,10 @@
     <Build Include="dbo\Procedures\SpPost_Insert.sql" />
     <Build Include="dbo\Procedures\SpPost_GetAll.sql" />
     <Build Include="dbo\Procedures\SpPost_Get.sql" />
+    <Build Include="dbo\Procedures\SpPost_GetByUserId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlogDB.publish.xml" />
+    <None Include="Azure.publish.xml" />
   </ItemGroup>
 </Project>
