@@ -72,11 +72,9 @@ public class PostService : IPostService
 
             }
 
-            post.Thumbnail = thumbnail;
-
             var userId = _claimsPrincipal.FindFirstValue("Id");
 
-            await _postData.InsertPost(new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = post.Thumbnail });
+            await _postData.InsertPost(new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = thumbnail });
 
         }
         catch (Exception ex)
@@ -138,4 +136,104 @@ public class PostService : IPostService
             throw;
         }
     }
+
+    public async Task UpdatePost(int postId, PostRequest post)
+    {
+        var userId = _claimsPrincipal.FindFirstValue("Id");
+
+        if (userId != null)
+        {
+            var userRecord = await _userData.GetUser(userId);
+
+            if (userRecord != null)
+            {
+
+                var postToEdit = await _postData.GetPostById(postId);
+
+                var credential = new DefaultAzureCredential();
+
+                // Create a SecretClient
+                var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
+
+                var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
+
+
+                var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
+
+                var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
+
+                var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
+
+                var config = new AmazonS3Config()
+                {
+                    RegionEndpoint = Amazon.RegionEndpoint.USEast1
+                };
+
+                using var client = new AmazonS3Client(credentials, config);
+
+ 
+                // user added or change thumnail
+                if (post.Image != null)
+                {
+                    
+                    // remove thumnail from s3 bucket if it exists
+                    if(postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
+                    {
+                        var objectname = postToEdit.Thumbnail.Split("/").Last();
+
+                        await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+                    }
+
+                    //adding the new thumnail
+                    var file = post.Image;
+                    var fileName = Path.GetFileName(post.Image.FileName);
+
+                    var objName = $"{Guid.NewGuid()}.{fileName}";
+
+
+                    var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+
+                    await _s3Service.UploadFileAsync(client, bucketName.Value.Value, objName, memoryStream);
+
+                    var thumbnail = $"https://{bucketName.Value.Value}.s3.amazonaws.com/{objName}";
+
+                    await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = thumbnail });
+                }
+
+                // user remove or unmodify thumnail
+                else
+                {
+                    // thumnail is removed case
+                    if (post.IsThumbnailRemoved && postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
+                    {
+                        var objectname = postToEdit.Thumbnail.Split("/").Last();
+
+ 
+                        await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+                        await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = "" });
+
+                    }
+
+                    else
+                    {
+                        // in cse thumnail is not change, send existing thumnail data
+                         
+                         await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail =postToEdit.Thumbnail});
+ 
+                    }
+                }
+
+           
+            }
+
+
+        }
+
+ 
+    }
+
+
 }

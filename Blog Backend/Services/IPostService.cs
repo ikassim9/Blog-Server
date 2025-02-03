@@ -10,4 +10,6 @@ public interface IPostService
 
     Task<PostModel> GetPostById(int id);
     Task<IEnumerable<UserPostModelResponse>> GetPostByUserId(string id);
+
+    Task UpdatePost(int postId, PostRequest post);
 }

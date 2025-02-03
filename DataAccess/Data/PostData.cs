@@ -37,4 +37,10 @@ public class PostData : IPostData
 
         return post;
     }
+
+    public Task UpdatePost(int postId, PostModel post)
+    {
+        return _db.SaveData<dynamic>("dbo.spPost_Update", new {postId = postId, title = post.Title, description =post.Description, thumbnail = post.Thumbnail });
+
+    }
 }

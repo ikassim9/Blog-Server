@@ -34,4 +34,16 @@ public class S3Service : IS3Service
           
     }
 
+    public async Task DeleteFile(IAmazonS3 client, string bucketName, string objectName)
+    {
+
+        var request = new DeleteObjectRequest
+        {
+            BucketName = bucketName,
+            Key = objectName
+        };
+
+        await client.DeleteObjectAsync(request);
+    }
+
 }

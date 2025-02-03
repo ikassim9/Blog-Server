@@ -7,7 +7,7 @@ public class PostRequest
 
     public string? Description { get; set; }
     
-    public string? Thumbnail { get; set; }
-
     public IFormFile? Image { get; set; }
+
+    public bool IsThumbnailRemoved { get; set; }
 }

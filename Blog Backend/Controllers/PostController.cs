@@ -81,4 +81,14 @@ public class PostController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
+    [HttpPut("{postId}")]
+    public async Task<ActionResult> UpdatePost(int postId, PostRequest post)
+    {
+
+        await _postService.UpdatePost(postId, post);
+
+        return Ok();
+    }
+
 }
