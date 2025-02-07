@@ -43,4 +43,10 @@ public class PostData : IPostData
         return _db.SaveData<dynamic>("dbo.spPost_Update", new {postId = postId, title = post.Title, description =post.Description, thumbnail = post.Thumbnail });
 
     }
+
+    public Task DeletePost(int postId)
+    {
+        return _db.SaveData<dynamic>("dbo.spPost_Delete", new { postId = postId});
+
+    }
 }

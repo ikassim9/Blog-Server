@@ -49,7 +49,7 @@ public class PostService : IPostService
 
                 var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
 
-                 var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
+                var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
 
                 var config = new AmazonS3Config()
                 {
@@ -89,10 +89,10 @@ public class PostService : IPostService
     {
         try
         {
-         IEnumerable<PostModel> posts = await _postData.GetPosts();
+            IEnumerable<PostModel> posts = await _postData.GetPosts();
 
             return posts.ToList();
- 
+
         }
         catch (Exception e)
         {
@@ -101,17 +101,17 @@ public class PostService : IPostService
             throw;
         }
 
-      
+
     }
 
     public async Task<PostModel> GetPostById(int id)
     {
 
-       var post = await _postData.GetPostById(id);
+        var post = await _postData.GetPostById(id);
 
         return post;
     }
- 
+
     public async Task<IEnumerable<UserPostModelResponse>> GetPostByUserId(string profileId)
     {
         try
@@ -171,11 +171,11 @@ public class PostService : IPostService
 
                 using var client = new AmazonS3Client(credentials, config);
 
- 
+
                 // user added or change thumnail
                 if (post.Image != null)
                 {
-                    
+
                     // remove thumnail from s3 bucket if it exists
                     if(postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
                     {
@@ -210,7 +210,7 @@ public class PostService : IPostService
                     {
                         var objectname = postToEdit.Thumbnail.Split("/").Last();
 
- 
+
                         await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
 
                         await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = "" });
@@ -220,20 +220,67 @@ public class PostService : IPostService
                     else
                     {
                         // in cse thumnail is not change, send existing thumnail data
-                         
-                         await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail =postToEdit.Thumbnail});
- 
+
+                        await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = postToEdit.Thumbnail });
+
                     }
                 }
 
-           
+
             }
 
 
         }
 
- 
+
     }
 
+    public async Task DeletePost(int postId)
+    {
+        var userId = _claimsPrincipal.FindFirstValue("Id");
 
+        if (userId != null)
+        {
+            var userRecord = await _userData.GetUser(userId);
+
+            if (userRecord != null)
+            {
+                var postToDelete = await _postData.GetPostById(postId);
+
+                // need to first remove s3 ojbect from bucket before deletign record in db
+                if (postToDelete != null && !string.IsNullOrWhiteSpace(postToDelete.Thumbnail))
+                {
+
+                    var credential = new DefaultAzureCredential();
+
+                    var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
+
+                    var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
+
+
+                    var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
+
+                    var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
+
+                    var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
+
+                    var config = new AmazonS3Config()
+                    {
+                        RegionEndpoint = Amazon.RegionEndpoint.USEast1
+                    };
+
+                    var objectname = postToDelete.Thumbnail.Split("/").Last();
+
+                    using var client = new AmazonS3Client(credentials, config);
+                    await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+
+                }
+
+                // delete from db
+                await _postData.DeletePost(postId);
+
+            }
+        }
+    }
 }

@@ -12,4 +12,5 @@ public interface IPostService
     Task<IEnumerable<UserPostModelResponse>> GetPostByUserId(string id);
 
     Task UpdatePost(int postId, PostRequest post);
+    Task DeletePost(int postId);
 }

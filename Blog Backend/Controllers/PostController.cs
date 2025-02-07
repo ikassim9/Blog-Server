@@ -91,4 +91,14 @@ public class PostController : ControllerBase
         return Ok();
     }
 
+    [Authorize]
+
+    [HttpDelete("{postId}")]
+
+    public async Task<ActionResult> DeletePost(int postId)
+    {
+        await _postService.DeletePost(postId);
+        return Ok();
+    }
+
 }
