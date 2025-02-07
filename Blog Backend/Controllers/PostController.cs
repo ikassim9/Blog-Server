@@ -85,10 +85,24 @@ public class PostController : ControllerBase
     [HttpPut("{postId}")]
     public async Task<ActionResult> UpdatePost(int postId, PostRequest post)
     {
+        try
+        {
+            await _postService.UpdatePost(postId, post);
 
-        await _postService.UpdatePost(postId, post);
+            return Ok();
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            return Unauthorized(e.Message);
 
-        return Ok();
+        }
+
+        catch (Exception e)
+        {
+            return StatusCode(500, "An unexpected error occurred.");
+
+        }
+
     }
 
     [Authorize]
@@ -97,8 +111,23 @@ public class PostController : ControllerBase
 
     public async Task<ActionResult> DeletePost(int postId)
     {
-        await _postService.DeletePost(postId);
-        return Ok();
+
+        try
+        {
+            await _postService.DeletePost(postId);
+            return Ok();
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            return Unauthorized(e.Message);
+        }
+
+        catch (Exception e)
+        {
+            return StatusCode(500, "An unexpected error occurred.");
+
+        }
+
     }
 
 }

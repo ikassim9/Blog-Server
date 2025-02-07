@@ -150,83 +150,90 @@ public class PostService : IPostService
 
                 var postToEdit = await _postData.GetPostById(postId);
 
-                var credential = new DefaultAzureCredential();
-
-                // Create a SecretClient
-                var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
-
-                var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
-
-
-                var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
-
-                var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
-
-                var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
-
-                var config = new AmazonS3Config()
+                if (userId == postToEdit.UserId)
                 {
-                    RegionEndpoint = Amazon.RegionEndpoint.USEast1
-                };
+                    var credential = new DefaultAzureCredential();
 
-                using var client = new AmazonS3Client(credentials, config);
+                    // Create a SecretClient
+                    var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
+
+                    var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
 
 
-                // user added or change thumnail
-                if (post.Image != null)
-                {
+                    var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
 
-                    // remove thumnail from s3 bucket if it exists
-                    if(postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
+                    var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
+
+                    var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
+
+                    var config = new AmazonS3Config()
                     {
-                        var objectname = postToEdit.Thumbnail.Split("/").Last();
+                        RegionEndpoint = Amazon.RegionEndpoint.USEast1
+                    };
 
-                        await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+                    using var client = new AmazonS3Client(credentials, config);
 
+
+                    // user added or change thumnail
+                    if (post.Image != null)
+                    {
+
+                        // remove thumnail from s3 bucket if it exists
+                        if(postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
+                        {
+                            var objectname = postToEdit.Thumbnail.Split("/").Last();
+
+                            await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+                        }
+
+                        //adding the new thumnail
+                        var file = post.Image;
+                        var fileName = Path.GetFileName(post.Image.FileName);
+
+                        var objName = $"{Guid.NewGuid()}.{fileName}";
+
+
+                        var memoryStream = new MemoryStream();
+                        await file.CopyToAsync(memoryStream);
+
+                        await _s3Service.UploadFileAsync(client, bucketName.Value.Value, objName, memoryStream);
+
+                        var thumbnail = $"https://{bucketName.Value.Value}.s3.amazonaws.com/{objName}";
+
+                        await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = thumbnail });
                     }
 
-                    //adding the new thumnail
-                    var file = post.Image;
-                    var fileName = Path.GetFileName(post.Image.FileName);
-
-                    var objName = $"{Guid.NewGuid()}.{fileName}";
-
-
-                    var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-
-                    await _s3Service.UploadFileAsync(client, bucketName.Value.Value, objName, memoryStream);
-
-                    var thumbnail = $"https://{bucketName.Value.Value}.s3.amazonaws.com/{objName}";
-
-                    await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = thumbnail });
-                }
-
-                // user remove or unmodify thumnail
-                else
-                {
-                    // thumnail is removed case
-                    if (post.IsThumbnailRemoved && postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
-                    {
-                        var objectname = postToEdit.Thumbnail.Split("/").Last();
-
-
-                        await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
-
-                        await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = "" });
-
-                    }
-
+                    // user remove or unmodify thumnail
                     else
                     {
-                        // in cse thumnail is not change, send existing thumnail data
+                        // thumnail is removed case
+                        if (post.IsThumbnailRemoved && postToEdit.Thumbnail != "" && postToEdit.Thumbnail != null)
+                        {
+                            var objectname = postToEdit.Thumbnail.Split("/").Last();
 
-                        await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = postToEdit.Thumbnail });
 
+                            await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+                            await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = "" });
+
+                        }
+
+                        else
+                        {
+                            // in cse thumnail is not change, send existing thumnail data
+
+                            await _postData.UpdatePost(postId, new PostModel { UserId = userId, Title = post.Title, Description = post.Description, Thumbnail = postToEdit.Thumbnail });
+
+                        }
                     }
+
                 }
 
-
+                else
+                {
+                    throw new UnauthorizedAccessException("User is not authorize to perform this operation");
+                }
             }
 
 
@@ -247,39 +254,46 @@ public class PostService : IPostService
             {
                 var postToDelete = await _postData.GetPostById(postId);
 
-                // need to first remove s3 ojbect from bucket before deletign record in db
-                if (postToDelete != null && !string.IsNullOrWhiteSpace(postToDelete.Thumbnail))
+                if (userId == postToDelete.UserId)
                 {
 
-                    var credential = new DefaultAzureCredential();
-
-                    var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
-
-                    var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
-
-
-                    var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
-
-                    var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
-
-                    var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
-
-                    var config = new AmazonS3Config()
+                    // need to first remove s3 ojbect from bucket before deletign record in db
+                    if (postToDelete != null && !string.IsNullOrWhiteSpace(postToDelete.Thumbnail))
                     {
-                        RegionEndpoint = Amazon.RegionEndpoint.USEast1
-                    };
 
-                    var objectname = postToDelete.Thumbnail.Split("/").Last();
+                        var credential = new DefaultAzureCredential();
 
-                    using var client = new AmazonS3Client(credentials, config);
-                    await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+                        var secretClient = new SecretClient(new Uri(_config["VaultKey"]), credential);
+
+                        var AwsAcessKey = await secretClient.GetSecretAsync("AwsConfiguration--AcessKey");
 
 
+                        var bucketName = await secretClient.GetSecretAsync("AwsConfiguration--BucketName");
+
+                        var AwsSecretKey = await secretClient.GetSecretAsync("AwsConfiguration--SecretKey");
+
+                        var credentials = new BasicAWSCredentials(AwsAcessKey.Value.Value, AwsSecretKey.Value.Value);
+
+                        var config = new AmazonS3Config()
+                        {
+                            RegionEndpoint = Amazon.RegionEndpoint.USEast1
+                        };
+
+                        var objectname = postToDelete.Thumbnail.Split("/").Last();
+
+                        using var client = new AmazonS3Client(credentials, config);
+                        await _s3Service.DeleteFile(client, bucketName.Value.Value, objectname);
+
+
+                    }
+
+                    // delete from db
+                    await _postData.DeletePost(postId);
                 }
-
-                // delete from db
-                await _postData.DeletePost(postId);
-
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("User is not authorize to perform this operation");
             }
         }
     }
