@@ -14,11 +14,13 @@ public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
     private readonly IUserData _userData;
+    private readonly ILogger<PostController> _logger;
 
-    public PostController(IPostService postService, IUserData userData)
+    public PostController(IPostService postService, IUserData userData, ILogger<PostController> logger)
     {
         _postService = postService;
         _userData = userData;
+        _logger = logger;
     }
 
     [Authorize]
@@ -76,9 +78,20 @@ public class PostController : ControllerBase
     [HttpGet("GetPostByUserId/{profileId}")]
     public async Task<ActionResult<IEnumerable<PostModel>>> GetPostByUserId(string profileId)
     {
-        var response = await _postService.GetPostByUserId(profileId);
+        try
+        {
+            var response = await _postService.GetPostByUserId(profileId);
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+
+            return StatusCode(500, "An unexpected error occurred.");
+
+        }
+
     }
 
     [Authorize]
