@@ -1,6 +1,5 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Azure.Core;
 using Blog_Backend.Services;
 using DataAccess.DbAccess;
 using FirebaseAdmin;
@@ -8,18 +7,46 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
- 
+using Amazon.S3;
+using Amazon;
+using Amazon.Runtime;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 //use production db only in production enviroment else we will use local db for dev
+var keyVaultEndPoint = new Uri(builder.Configuration["VaultKey"]);
+
 if (builder.Environment.IsProduction())
 {
-    var keyVaultEndPoint = new Uri(builder.Configuration["VaultKey"]);
-
+    // will use variables from keyvault
     builder.Configuration.AddAzureKeyVault(keyVaultEndPoint, new DefaultAzureCredential());
+
+    
 }
+
+var AwsSecretKey = builder.Configuration["AwsConfiguration:SecretKey"];
+var AwsAcessKey = builder.Configuration["AwsConfiguration:AcessKey"];
+
+var credential = new BasicAWSCredentials(AwsAcessKey, AwsSecretKey);
+
+ 
+
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+
+    return new AmazonS3Client(credential, RegionEndpoint.USEast1);
+});
+
+// add firebase
+
+builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromJson(builder.Configuration.GetValue<string>("FIREBASE_CONFIG"))
+
+}));
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -40,18 +67,10 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddAzureWebAppDiagnostics();
 });
 
-// add firebase
 
-builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
-{
-    Credential = GoogleCredential.FromJson(builder.Configuration.GetValue<string>("FIREBASE_CONFIG"))
-
-}));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddScheme<AuthenticationSchemeOptions, FirebasAuthenticationHandler>(JwtBearerDefaults.AuthenticationScheme, (o) => { });
-
-
 
 builder.Services.AddCors(options => options.AddPolicy("default", policy =>
 {
@@ -91,14 +110,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("default");
 }
 
-app.UseSwagger();
-app.UseSwaggerUI();
 
-app.UseCors("default");
 app.UseCors("production");
-
 
 app.UseHttpsRedirection();
 

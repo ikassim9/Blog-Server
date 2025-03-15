@@ -5,6 +5,12 @@ namespace Blog_Backend.Services;
 public interface IS3Service
 {
 
-    Task UploadFileAsync(IAmazonS3 client, string bucketName, string objectName, MemoryStream memoryStream);
-    Task DeleteFile(IAmazonS3 client, string bucketName, string objectName);
+    /// <summary>
+    /// Uploads new thumnail to s3 bucket
+    /// </summary>
+    /// <param name="file">The thumbnail to upload</param>
+    /// <param name="bucketName">The bucket to upload thumbnail to</param>
+    /// <returns></returns>
+    Task<string> UploadThumbnailAsync(IFormFile file, string bucketName);
+    Task DeleteThumbnailAsync(string bucketName, string objectName);
 }

@@ -7,19 +7,24 @@ namespace Blog_Backend.Services;
 public class S3Service : IS3Service
 {
 
-    public async Task UploadFileAsync(
-     IAmazonS3 client,
-     string bucketName,
-     string objectName,
-     MemoryStream memoryStream)
-    {
-        var request = new PutObjectRequest
-        {
-            BucketName = bucketName,
-            Key = objectName,
-            InputStream = memoryStream
+    private readonly IAmazonS3 _amazonS3;
 
-        };
+
+    public S3Service(IAmazonS3 amazonS3)
+    {
+        _amazonS3 = amazonS3;
+    }
+
+    public async Task<string> UploadThumbnailAsync(
+     IFormFile file,
+     string bucketName)
+    {
+        var objectName = "";
+        var fileName = Path.GetFileName(file.FileName);
+        var memoryStream = new MemoryStream();
+        await file.CopyToAsync(memoryStream);
+
+        objectName = $"{Guid.NewGuid()}.{fileName}";
 
         var uploadRequest = new TransferUtilityUploadRequest()
         {
@@ -29,12 +34,15 @@ public class S3Service : IS3Service
 
         };
 
-        var transferUtility = new TransferUtility(client);
+        var transferUtility = new TransferUtility(_amazonS3);
         await transferUtility.UploadAsync(uploadRequest);
-          
+        var thumbnail = $"https://{bucketName}.s3.amazonaws.com/{objectName}";
+
+        return thumbnail;
     }
 
-    public async Task DeleteFile(IAmazonS3 client, string bucketName, string objectName)
+
+    public async Task DeleteThumbnailAsync(string bucketName, string objectName)
     {
 
         var request = new DeleteObjectRequest
@@ -43,7 +51,7 @@ public class S3Service : IS3Service
             Key = objectName
         };
 
-        await client.DeleteObjectAsync(request);
+        await _amazonS3.DeleteObjectAsync(request);
     }
 
 }
