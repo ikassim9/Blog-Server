@@ -66,20 +66,33 @@ public async Task<IEnumerable<PostModel>> GetPosts()
         return post;
     }
 
-    public async Task<IEnumerable<UserPostModelResponse>> GetPostByUserId(string profileId)
+    public async Task<IEnumerable<UserPostModelResponse>> GetPostByUserId()
     {
         try
         {
+            // gets the login user posts, using id provided by client is not good.
+            var userId = _claimsPrincipal.FindFirstValue("Id");
+            var name = _claimsPrincipal.FindFirstValue("Name");
 
-            var posts = await _postData.GetPostByUserId(profileId);
-
-            return posts.Select(post => new UserPostModelResponse
+            var user = await _userData.GetUser(userId);
+            if (user != null)
             {
-                Id = post.Id,
-                Title = post.Title,
-                Description = post.Description,
-                Thumbnail = post.Thumbnail
-            });
+
+                var posts = await _postData.GetPostByUserId(userId);
+
+                return posts.Select(post => new UserPostModelResponse
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Description = post.Description,
+                    Thumbnail = post.Thumbnail
+                });
+            }
+            else
+            {
+                return new List<UserPostModelResponse>();
+
+            }
 
 
         }
