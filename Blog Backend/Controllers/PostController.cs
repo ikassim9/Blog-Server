@@ -33,9 +33,9 @@ public class PostController : ControllerBase
             await _postService.CreatePost(post);
 
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            _logger.LogError(ex.Message);
             throw;
         }
 
@@ -54,10 +54,10 @@ public class PostController : ControllerBase
 
             return Ok(response);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
 
-            Console.WriteLine(e);
+            _logger.LogError(ex.Message);
 
             throw;
         }
@@ -69,9 +69,19 @@ public class PostController : ControllerBase
 
     public  async Task<ActionResult<PostModel>> GetPostById(int id)
     {
-        var response = await _postService.GetPostById(id);
 
-        return Ok(response);
+        try
+        {
+            var response = await _postService.GetPostById(id);
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    
     }
 
     [Authorize]
@@ -104,14 +114,16 @@ public class PostController : ControllerBase
 
             return Ok();
         }
-        catch (UnauthorizedAccessException e)
+        catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(e.Message);
+            _logger.LogError(ex.Message);
+            return Unauthorized(ex.Message);
 
         }
 
-        catch (Exception e)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return StatusCode(500, "An unexpected error occurred.");
 
         }
@@ -130,13 +142,15 @@ public class PostController : ControllerBase
             await _postService.DeletePost(postId);
             return Ok();
         }
-        catch (UnauthorizedAccessException e)
+        catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(e.Message);
+            _logger.LogError(ex.Message);
+            return Unauthorized(ex.Message);
         }
 
-        catch (Exception e)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return StatusCode(500, "An unexpected error occurred.");
 
         }

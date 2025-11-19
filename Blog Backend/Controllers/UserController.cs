@@ -18,6 +18,7 @@ namespace Blog_Backend.Controllers
 
 
         private readonly IUserService _userService;
+        private readonly ILogger<PostController> _logger;
 
 
 
@@ -37,9 +38,9 @@ namespace Blog_Backend.Controllers
 
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                _logger.LogError(ex.Message);
                 throw;
             }
 
@@ -59,7 +60,7 @@ namespace Blog_Backend.Controllers
             }
             catch (Exception ex)
             {
-
+                _logger.LogError(ex.Message);
                 throw;
             }
        
