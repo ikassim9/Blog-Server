@@ -23,10 +23,10 @@ if (builder.Environment.IsProduction())
     // will use variables from keyvault
     builder.Configuration.AddAzureKeyVault(keyVaultEndPoint, new DefaultAzureCredential());
 
-    
+
 }
 
-var AwsSecretKey = builder.Configuration["AwsConfiguration:SecretKey"];
+ var AwsSecretKey = builder.Configuration["AwsConfiguration:SecretKey"];
 var AwsAcessKey = builder.Configuration["AwsConfiguration:AcessKey"];
 
 var credential = new BasicAWSCredentials(AwsAcessKey, AwsSecretKey);
@@ -43,7 +43,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
 
 builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
 {
-    Credential = GoogleCredential.FromJson(builder.Configuration.GetValue<string>("FIREBASE_CONFIG"))
+    Credential = GoogleCredential.FromJson(builder.Configuration.GetValue<string>("FirebaseConfig"))
 
 }));
 
